@@ -11,7 +11,7 @@ URL_RATINGS = 'https://raw.githubusercontent.com/dotnet/mbmlbook/main/src/5.%20M
 def split_movielens_ratings(df_ratings: pd.DataFrame,
                             train_frac: float = 0.7,
                             random_state: int = 20220926,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame, np.ndarray, np.ndarray]:
 
     #  "For each person we will use 70% of their likes/dislikes to train on and leave 30% to use for validation"
     idx_train = df_ratings.groupby('user_id').sample(frac=train_frac, replace=False, random_state=random_state).index
@@ -35,6 +35,10 @@ def load_movielens_dataset(url_movies: Text = URL_MOVIES,
     df_ratings.columns = ['user_id', 'movie_id', 'movie_rating']
     assert not df_ratings.duplicated(['user_id','movie_id']).any()
 
+    idx_user, users = pd.factorize(df_ratings.user_id.values)
+    idx_movie, movies = pd.factorize(df_ratings.movie_id.values)
+    df_ratings.loc[:, 'idx_user'] = idx_user
+    df_ratings.loc[:, 'idx_movie'] = idx_movie
 
     df_summary = (df_ratings.groupby('movie_id').
                   agg({'movie_id': len, 'movie_rating': np.mean}).
@@ -42,4 +46,4 @@ def load_movielens_dataset(url_movies: Text = URL_MOVIES,
                   reset_index()
                  )
     df_movies = df_movies.merge(df_summary, on='movie_id')
-    return df_movies, df_ratings
+    return df_movies, df_ratings, users, movies
