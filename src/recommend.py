@@ -20,7 +20,7 @@ class CollabNN(nn.Module):
     def __init__(self,
                  user_sz: Tuple[int, int],
                  item_sz: Tuple[int, int],
-                 y_range=Tuple[float, float],
+                 y_range: Tuple[float, float],
                  n_act: int = 100
 ):
         super().__init__()
